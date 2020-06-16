@@ -22,7 +22,6 @@ public class OsProcessSource implements ProcessSource {
     @Override
     public Stream<Process> getProcesses() {
 
-
         List<ProcessHandle> allProcesses = ProcessHandle.allProcesses().collect(Collectors.toList());
         List<Process> processes = new ArrayList<>();
         for (ProcessHandle process : allProcesses) {
@@ -32,29 +31,17 @@ public class OsProcessSource implements ProcessSource {
             if (parent.isPresent()) {
                 parentId = parent.get().pid();
             }
-            Optional<String[]> arguments = process.info().arguments();
-            String[] argsArray = arguments.isPresent() ? arguments.get() : new String[0];
 
-            processes.add(new Process(process.pid(), parentId, new User(process.info().user().toString()),process.info().command().toString(),
-                    argsArray));
+            Optional<String> commands = process.info().command();
+            String strCommand = commands.isPresent() ? commands.get() : new String("N/A");
+
+            Optional<String[]> arguments = process.info().arguments();
+            String[] argsArray = arguments.isPresent() ? arguments.get() : new String[]{"N/A"};
+
+            processes.add(new Process(process.pid(), parentId, new User(process.info().user().get()), strCommand, argsArray));
         }
 
-//
-//        ProcessHandle processHandle = ProcessHandle.current();
-//        ProcessHandle.Info processInfo = processHandle.info();
-////        Stream<Process> row = null;
-//        for (int i = 0; i < allProcesses.length; i++) {
-//            processes.add(new Process(Long.parseLong(allProcesses[i].toString()), 1,
-//                    new User(processInfo.user().toString()), processInfo.command().toString(),
-//                    new String[]{processInfo.arguments().toString()}));
-//        }
-//        Stream<Process> stream = Arrays.stream(processes);
         return processes.stream();
 
-
-//        Stream<ProcessHandle> allProcesses = ProcessHandle.allProcesses();
-//        words.stream().filter(word -> word.length() > 6).forEach(System.out::println);
-//        return Stream.of(new Process(1,  1, new User("root"), "init", new String[0]),
-//                         new Process(42, 1, new User("Codecooler"), "processWatch", new String[] {"--cool=code", "-v"}));
     }
 }
