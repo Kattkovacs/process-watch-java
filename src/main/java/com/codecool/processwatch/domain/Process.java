@@ -1,6 +1,7 @@
 package com.codecool.processwatch.domain;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * A class representing a displayable and queryable process.
@@ -36,6 +37,7 @@ public class Process {
      * @return a long representing the process ID.
      */
     public long getPid() {
+
         return pid;
     }
 
