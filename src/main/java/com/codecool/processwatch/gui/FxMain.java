@@ -61,7 +61,9 @@ public class FxMain extends Application {
 
 
         var refreshButton = new Button("Refresh");
-        //refreshButton.setOnAction(ignoreEvent -> System.out.println("Button pressed"));
+
+//        refreshButton.setOnAction(ignoreEvent -> System.out.println("Button pressed"));
+
         refreshButton.setOnAction(ignoreEvent -> app.refresh());
 
         var box = new VBox();
