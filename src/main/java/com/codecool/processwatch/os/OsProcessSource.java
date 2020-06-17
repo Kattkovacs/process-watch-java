@@ -16,23 +16,16 @@ import com.codecool.processwatch.domain.User;
  * about the current processes.
  */
 public class OsProcessSource implements ProcessSource {
-    private static List<Process> processes = new ArrayList<>();
-
-    public OsProcessSource() {
-        setProcesses();
-    }
-
     /**
-     * This method gets information about the current processes (by using Java ProcessHandle)
-     * and use the constructor of Process class to create new Process object for every current
-     * process.
-     * In addition the method calls addProcessToList() method to make a collection from the
-     * created Processes.
+     * {@inheritDoc}
      */
-    public static void setProcesses() {
+    @Override
+    public Stream<Process> getProcesses() {
+
         List<ProcessHandle> allProcesses = ProcessHandle.allProcesses().collect(Collectors.toList());
-        System.out.println("allproc size" + allProcesses.size());
+        List<Process> processes = new ArrayList<>();
         for (ProcessHandle process : allProcesses) {
+
             Optional<ProcessHandle> parent = process.parent();
             long parentId = 1;
             if (parent.isPresent()) {
@@ -44,24 +37,10 @@ public class OsProcessSource implements ProcessSource {
 
             Optional<String[]> arguments = process.info().arguments();
             String[] argsArray = arguments.isPresent() ? arguments.get() : new String[]{"N/A"};
-            Process processToAdd = new Process(process.pid(), parentId, new User(process.info().user().get()), strCommand, argsArray);
-            addProcessToList(processToAdd);
+
+            processes.add(new Process(process.pid(), parentId, new User(process.info().user().get()), strCommand, argsArray));
         }
-    }
 
-    /**
-     * Add Process object to the collection called: 'processes'
-     * @param processToAdd the Process object to add to the collection
-     */
-    public static void addProcessToList(Process processToAdd) {
-        processes.add(processToAdd);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Process> getProcesses() {
         return processes.stream();
 
     }
