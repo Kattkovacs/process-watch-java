@@ -3,13 +3,16 @@ package com.codecool.processwatch.gui;
 import com.codecool.processwatch.domain.ProcessWatchApp;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import static javafx.collections.FXCollections.observableArrayList;
 
 /**
@@ -61,16 +64,64 @@ public class FxMain extends Application {
 
 
         var refreshButton = new Button("Refresh");
-
 //        refreshButton.setOnAction(ignoreEvent -> System.out.println("Button pressed"));
-
         refreshButton.setOnAction(ignoreEvent -> app.refresh());
 
+        // Filter feature starts here
+
+        FilteredList<ProcessView> flProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
+        tableView.setItems(flProcess);//Set the table's items using the filtered list
+
+        ChoiceBox<String> choiceBox = new ChoiceBox();
+        choiceBox.getItems().addAll("Process ID", "Parent Process ID", "Owner", "Name", "Arguments");
+        choiceBox.setValue("Owner");
+
+        TextField textField = new TextField();
+        textField.setPromptText("Search here!");
+        textField.setOnKeyReleased(keyEvent ->
+        {
+            switch (choiceBox.getValue())//Switch on choiceBox value
+            {
+                case "Process ID":
+                    flProcess.setPredicate(p -> p.getPid().toString().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    break;
+                case "Parent Process ID":
+                    flProcess.setPredicate(p -> p.getParentPid().toString().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    break;
+                case "Owner":
+                    flProcess.setPredicate(p -> p.getUserName().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    break;
+                case "Name":
+                    flProcess.setPredicate(p -> p.getProcessName().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    break;
+                case "Arguments":
+                    flProcess.setPredicate(p -> p.getArgs().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    break;
+
+            }
+        });
+
+        choiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) ->
+        {//reset table and textfield when new choice is selected
+            if (newVal != null)
+            {
+                textField.setText("");
+                flProcess.setPredicate(null);//This is same as saying flPerson.setPredicate(p->true);
+            }
+        });
+
+        HBox hBox = new HBox(choiceBox, textField);//Add choiceBox and textField to hBox
+        hBox.setAlignment(Pos.CENTER);//Center HBox
+
+        //vbox.getChildren().addAll(label, table, hBox);
+
         var box = new VBox();
+        box.setSpacing(5);
+        box.setPadding(new Insets(10, 10, 10, 10));
         var scene = new Scene(box, 640, 480);
         var elements = box.getChildren();
-        elements.addAll(refreshButton,
-                        tableView);
+        elements.addAll(refreshButton, hBox,
+                tableView);
 
         primaryStage.setScene(scene);
         primaryStage.show();
