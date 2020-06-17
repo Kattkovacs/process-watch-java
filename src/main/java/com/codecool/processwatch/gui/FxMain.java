@@ -4,6 +4,7 @@ import com.codecool.processwatch.domain.ProcessWatchApp;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -69,8 +70,10 @@ public class FxMain extends Application {
 
         // Filter feature starts here
 
-        FilteredList<ProcessView> flProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
-        tableView.setItems(flProcess);//Set the table's items using the filtered list
+        FilteredList<ProcessView> filteredProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
+        SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
+        sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
+        tableView.setItems(sortedProcess);//Set the table's items using the sorted List
 
         ChoiceBox<String> choiceBox = new ChoiceBox();
         choiceBox.getItems().addAll("Process ID", "Parent Process ID", "Owner", "Name", "Arguments");
@@ -83,19 +86,19 @@ public class FxMain extends Application {
             switch (choiceBox.getValue())//Switch on choiceBox value
             {
                 case "Process ID":
-                    flProcess.setPredicate(p -> p.getPid().toString().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    filteredProcess.setPredicate(p -> p.getPid().toString().toLowerCase().contains(textField.getText().toLowerCase().trim()));
                     break;
                 case "Parent Process ID":
-                    flProcess.setPredicate(p -> p.getParentPid().toString().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    filteredProcess.setPredicate(p -> p.getParentPid().toString().toLowerCase().contains(textField.getText().toLowerCase().trim()));
                     break;
                 case "Owner":
-                    flProcess.setPredicate(p -> p.getUserName().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    filteredProcess.setPredicate(p -> p.getUserName().toLowerCase().contains(textField.getText().toLowerCase().trim()));
                     break;
                 case "Name":
-                    flProcess.setPredicate(p -> p.getProcessName().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    filteredProcess.setPredicate(p -> p.getProcessName().toLowerCase().contains(textField.getText().toLowerCase().trim()));
                     break;
                 case "Arguments":
-                    flProcess.setPredicate(p -> p.getArgs().toLowerCase().contains(textField.getText().toLowerCase().trim()));
+                    filteredProcess.setPredicate(p -> p.getArgs().toLowerCase().contains(textField.getText().toLowerCase().trim()));
                     break;
 
             }
@@ -106,7 +109,7 @@ public class FxMain extends Application {
             if (newVal != null)
             {
                 textField.setText("");
-                flProcess.setPredicate(null);//This is same as saying flPerson.setPredicate(p->true);
+                filteredProcess.setPredicate(null);//This is same as saying flPerson.setPredicate(p->true);
             }
         });
 
