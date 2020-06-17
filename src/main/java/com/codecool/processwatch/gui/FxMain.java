@@ -1,5 +1,6 @@
 package com.codecool.processwatch.gui;
 
+import com.codecool.processwatch.domain.ProcessWatchApp;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -18,6 +19,7 @@ public class FxMain extends Application {
     private static final String TITLE = "Process Watch";
 
     private App app;
+
 
     /**
      * Entrypoint for the javafx:run maven task.
@@ -38,6 +40,7 @@ public class FxMain extends Application {
 
         ObservableList<ProcessView> displayList = observableArrayList();
         app = new App(displayList);
+
         // TODO: Factor out the repetitive code
         var tableView = new TableView<ProcessView>(displayList);
         var pidColumn = new TableColumn<ProcessView, Long>("Process ID");
@@ -56,8 +59,11 @@ public class FxMain extends Application {
         tableView.getColumns().add(processNameColumn);
         tableView.getColumns().add(argsColumn);
 
+
         var refreshButton = new Button("Refresh");
+
 //        refreshButton.setOnAction(ignoreEvent -> System.out.println("Button pressed"));
+
         refreshButton.setOnAction(ignoreEvent -> app.refresh());
 
         var box = new VBox();
