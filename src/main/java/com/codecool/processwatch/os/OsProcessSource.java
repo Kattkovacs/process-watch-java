@@ -31,6 +31,7 @@ public class OsProcessSource implements ProcessSource {
      */
     public static void setProcesses() {
         List<ProcessHandle> allProcesses = ProcessHandle.allProcesses().collect(Collectors.toList());
+        System.out.println("allproc size" + allProcesses.size());
         for (ProcessHandle process : allProcesses) {
             Optional<ProcessHandle> parent = process.parent();
             long parentId = 1;
