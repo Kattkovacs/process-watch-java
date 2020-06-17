@@ -57,7 +57,8 @@ public class FxMain extends Application {
         tableView.getColumns().add(argsColumn);
 
         var refreshButton = new Button("Refresh");
-        refreshButton.setOnAction(ignoreEvent -> System.out.println("Button pressed"));
+//        refreshButton.setOnAction(ignoreEvent -> System.out.println("Button pressed"));
+        refreshButton.setOnAction(ignoreEvent -> app.refresh());
 
         var box = new VBox();
         var scene = new Scene(box, 640, 480);
