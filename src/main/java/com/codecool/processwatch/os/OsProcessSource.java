@@ -23,6 +23,7 @@ public class OsProcessSource implements ProcessSource {
     public Stream<Process> getProcesses() {
 
         List<ProcessHandle> allProcesses = ProcessHandle.allProcesses().collect(Collectors.toList());
+        System.out.println("size of current processes: " + allProcesses.size()); //TODO: Clear this line after finish testing
         List<Process> processes = new ArrayList<>();
         for (ProcessHandle process : allProcesses) {
 
