@@ -66,6 +66,13 @@ public class FxMain extends Application {
         tableView.getColumns().add(processNameColumn);
         tableView.getColumns().add(argsColumn);
 
+
+        //Selection
+        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        ObservableList <ProcessView> selectedRows = tableView.getSelectionModel().getSelectedItems();
+        System.out.println(selectedRows);
+
+
         // Filter feature starts here
         FilteredList<ProcessView> filteredProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
 
@@ -79,6 +86,9 @@ public class FxMain extends Application {
             countRunningProcesses.set(displayList.size());
             footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
         });
+
+        var killButton = new Button("End Process");
+
 
         SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
         sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
@@ -136,10 +146,19 @@ public class FxMain extends Application {
         box.setPadding(new Insets(10, 10, 10, 10));
         var scene = new Scene(box, 640, 480);
         var elements = box.getChildren();
-        elements.addAll(controlPane,
-                tableView, footerPane);
+        elements.addAll(controlPane, tableView, killButton, footerPane);
 
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 }
+
+
+
+//public void destroyProcess(Long pid) {
+//        Stream<ProcessHandle> liveProcesses = ProcessHandle.allProcesses();
+//        liveProcesses
+//        .filter(ProcessHandle::isAlive)
+//        .filter(processHandle -> processHandle.pid() == pid)
+//        .forEach(ProcessHandle::destroy);
+//        }
