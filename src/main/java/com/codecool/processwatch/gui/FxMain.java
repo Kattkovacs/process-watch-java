@@ -1,18 +1,18 @@
 package com.codecool.processwatch.gui;
 
-import com.codecool.processwatch.domain.ProcessWatchApp;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
@@ -51,12 +51,15 @@ public class FxMain extends Application {
         pidColumn.setCellValueFactory(new PropertyValueFactory<ProcessView, Long>("pid"));
         var parentPidColumn = new TableColumn<ProcessView, Long>("Parent Process ID");
         parentPidColumn.setCellValueFactory(new PropertyValueFactory<ProcessView, Long>("parentPid"));
+        parentPidColumn.setMinWidth(150);
         var userNameColumn = new TableColumn<ProcessView, String>("Owner");
         userNameColumn.setCellValueFactory(new PropertyValueFactory<ProcessView, String>("userName"));
         var processNameColumn = new TableColumn<ProcessView, String>("Name");
         processNameColumn.setCellValueFactory(new PropertyValueFactory<ProcessView, String>("processName"));
+        processNameColumn.setMinWidth(200);
         var argsColumn = new TableColumn<ProcessView, String>("Arguments");
         argsColumn.setCellValueFactory(new PropertyValueFactory<ProcessView, String>("args"));
+        argsColumn.setMinWidth(200);
         tableView.getColumns().add(pidColumn);
         tableView.getColumns().add(parentPidColumn);
         tableView.getColumns().add(userNameColumn);
@@ -65,12 +68,14 @@ public class FxMain extends Application {
 
 
         var refreshButton = new Button("Refresh");
-//        refreshButton.setOnAction(ignoreEvent -> System.out.println("Button pressed"));
         refreshButton.setOnAction(ignoreEvent -> app.refresh());
 
         // Filter feature starts here
-
         FilteredList<ProcessView> filteredProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
+        AtomicReference<Integer> countFilteredProcesses = new AtomicReference<>(filteredProcess.size());
+
+        Label footerPane = new Label(countFilteredProcesses.toString() + " item(s) displayed");
+
         SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
         sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
         tableView.setItems(sortedProcess);//Set the table's items using the sorted List
@@ -102,29 +107,34 @@ public class FxMain extends Application {
                     break;
 
             }
+            countFilteredProcesses.set(filteredProcess.size());
+            System.out.println("filteredProcess size: " + countFilteredProcesses);
+            footerPane.setText(countFilteredProcesses.toString() + " item(s) displayed");
         });
 
         choiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) ->
-        {//reset table and textfield when new choice is selected
+        {
             if (newVal != null)
             {
                 textField.setText("");
-                filteredProcess.setPredicate(null);//This is same as saying flPerson.setPredicate(p->true);
+                filteredProcess.setPredicate(null);
             }
         });
 
-        HBox hBox = new HBox(choiceBox, textField);//Add choiceBox and textField to hBox
-        hBox.setAlignment(Pos.CENTER);//Center HBox
-
-        //vbox.getChildren().addAll(label, table, hBox);
+        HBox controlPaneLeft = new HBox(refreshButton);
+//        controlPaneLeft.setAlignment(Pos.BASELINE_LEFT);
+        HBox controlPaneRight = new HBox(choiceBox, textField);
+//        controlPaneRight.setAlignment(Pos.BASELINE_RIGHT);
+        HBox controlPane = new HBox(controlPaneLeft, controlPaneRight);
+        controlPane.setSpacing(30);
 
         var box = new VBox();
         box.setSpacing(5);
         box.setPadding(new Insets(10, 10, 10, 10));
         var scene = new Scene(box, 640, 480);
         var elements = box.getChildren();
-        elements.addAll(refreshButton, hBox,
-                tableView);
+        elements.addAll(controlPane,
+                tableView, footerPane);
 
         primaryStage.setScene(scene);
         primaryStage.show();
