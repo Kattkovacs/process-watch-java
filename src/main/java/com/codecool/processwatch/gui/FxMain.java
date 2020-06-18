@@ -45,7 +45,7 @@ public class FxMain extends Application {
      */
     public void start(Stage primaryStage) {
 
-        //Favicon
+        //Add Favicon
         Image icon = new Image("/icon-process.png");
         primaryStage.getIcons().add(icon);
 
@@ -55,6 +55,7 @@ public class FxMain extends Application {
         app = new App(displayList);
 
         // TODO: Factor out the repetitive code
+        //Create TableView and set up the Columns
         var tableView = new TableView<ProcessView>(displayList);
         var pidColumn = new TableColumn<ProcessView, Long>("Process ID");
         pidColumn.setCellValueFactory(new PropertyValueFactory<ProcessView, Long>("pid"));
@@ -76,20 +77,25 @@ public class FxMain extends Application {
         tableView.getColumns().add(argsColumn);
 
 
-        //Selection
+        //Set selectionMode to MULTIPLE
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        // Filter feature starts here
+        // Create a Filtered List for filteredProcesses
         FilteredList<ProcessView> filteredProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
 
+        //Create 2 variables to store the countFilteredProcesses and countRunningProcesses
         AtomicReference<Integer> countFilteredProcesses = new AtomicReference<>(filteredProcess.size());
         AtomicReference<Integer> countRunningProcesses = new AtomicReference<>(displayList.size());
+
+        //Create a Label which we use to display information in the footerPane of our Window
         Label footerPane = new Label(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
 
+        //Create a ChoiceBox which will use for categorisation of filter
         ChoiceBox<String> choiceBox = new ChoiceBox();
         choiceBox.getItems().addAll("Process ID", "Parent Process ID", "Owner", "Name", "Arguments");
         choiceBox.setValue("Owner");
 
+        //Create a TextField which will use for filtering the table content
         TextField textField = new TextField();
         textField.setPromptText("Search here!");
         textField.setOnKeyReleased(keyEvent ->
@@ -117,19 +123,23 @@ public class FxMain extends Application {
             footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
         });
 
+        //Create refreshButton and binding methods in case of click
         var refreshButton = new Button("Refresh");
         refreshButton.setOnAction(ignoreEvent -> {
             app.refresh();
             textField.setText("");
+            filteredProcess.setPredicate(p -> true);
             countRunningProcesses.set(displayList.size());
             countFilteredProcesses.set(filteredProcess.size());
             footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
         });
 
+        // Create a Sorted List for sortedProcesses
         SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
         sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
         tableView.setItems(sortedProcess);//Set the table's items using the sorted List
 
+        //Create killButton and binding methods in case of click
         var killButton = new Button("End Process");
         killButton.setOnAction(event -> {
             ObservableList <ProcessView> selectedRows = tableView.getSelectionModel().getSelectedItems();
@@ -138,26 +148,21 @@ public class FxMain extends Application {
                 Long pid = selectedRow.getPid();
                 destroyProcess(pid);
             }
-            textField.setText("");
             app.refresh();
+            textField.setText("");
+            filteredProcess.setPredicate(p -> true);
+            countRunningProcesses.set(displayList.size());
+            countFilteredProcesses.set(filteredProcess.size());
+            footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
         });
 
-        choiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) ->
-        {
-            if (newVal != null)
-            {
-                textField.setText("");
-                filteredProcess.setPredicate(null);
-            }
-        });
-
+        //Create controlPane which will use at top of the Window
         HBox controlPaneLeft = new HBox(refreshButton);
-//        controlPaneLeft.setAlignment(Pos.BASELINE_LEFT);
         HBox controlPaneRight = new HBox(choiceBox, textField);
-//        controlPaneRight.setAlignment(Pos.BASELINE_RIGHT);
         HBox controlPane = new HBox(controlPaneLeft, controlPaneRight);
         controlPane.setSpacing(30);
 
+        //Create box which will use as main part of the Window
         var box = new VBox();
         box.setSpacing(5);
         box.setPadding(new Insets(10, 10, 10, 10));
