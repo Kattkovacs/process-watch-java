@@ -66,15 +66,19 @@ public class FxMain extends Application {
         tableView.getColumns().add(processNameColumn);
         tableView.getColumns().add(argsColumn);
 
-
-        var refreshButton = new Button("Refresh");
-        refreshButton.setOnAction(ignoreEvent -> app.refresh());
-
         // Filter feature starts here
         FilteredList<ProcessView> filteredProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
-        AtomicReference<Integer> countFilteredProcesses = new AtomicReference<>(filteredProcess.size());
 
-        Label footerPane = new Label(countFilteredProcesses.toString() + " item(s) displayed");
+        AtomicReference<Integer> countFilteredProcesses = new AtomicReference<>(filteredProcess.size());
+        AtomicReference<Integer> countRunningProcesses = new AtomicReference<>(displayList.size());
+        Label footerPane = new Label(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
+
+        var refreshButton = new Button("Refresh");
+        refreshButton.setOnAction(ignoreEvent -> {
+            app.refresh();
+            countRunningProcesses.set(displayList.size());
+            footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
+        });
 
         SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
         sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
@@ -108,8 +112,7 @@ public class FxMain extends Application {
 
             }
             countFilteredProcesses.set(filteredProcess.size());
-            System.out.println("filteredProcess size: " + countFilteredProcesses);
-            footerPane.setText(countFilteredProcesses.toString() + " item(s) displayed");
+            footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
         });
 
         choiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) ->
