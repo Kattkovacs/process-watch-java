@@ -80,6 +80,9 @@ public class FxMain extends Application {
             footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
         });
 
+        var killButton = new Button("End Process");
+
+
         SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
         sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
         tableView.setItems(sortedProcess);//Set the table's items using the sorted List
@@ -136,10 +139,19 @@ public class FxMain extends Application {
         box.setPadding(new Insets(10, 10, 10, 10));
         var scene = new Scene(box, 640, 480);
         var elements = box.getChildren();
-        elements.addAll(controlPane,
-                tableView, footerPane);
+        elements.addAll(controlPane, tableView, killButton, footerPane);
 
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 }
+
+
+
+//public void destroyProcess(Long pid) {
+//        Stream<ProcessHandle> liveProcesses = ProcessHandle.allProcesses();
+//        liveProcesses
+//        .filter(ProcessHandle::isAlive)
+//        .filter(processHandle -> processHandle.pid() == pid)
+//        .forEach(ProcessHandle::destroy);
+//        }

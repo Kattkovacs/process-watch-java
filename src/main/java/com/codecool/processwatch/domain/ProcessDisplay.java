@@ -13,7 +13,7 @@ public abstract class ProcessDisplay {
      *
      * @param processes a stream of a snapshot of current processes.
      */
-    public final void display(Stream<Process> processes){
+    public final void display(Stream<Process> processes) {
         clear();
         processes.forEach(this::addProcess);
     }
