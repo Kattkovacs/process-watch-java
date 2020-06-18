@@ -1,6 +1,7 @@
 package com.codecool.processwatch.gui;
 
 import javafx.application.Application;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -75,9 +76,6 @@ public class FxMain extends Application {
 
         //Selection
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        ObservableList <ProcessView> selectedRows = tableView.getSelectionModel().getSelectedItems();
-        System.out.println(selectedRows);
-
 
         // Filter feature starts here
         FilteredList<ProcessView> filteredProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
@@ -94,7 +92,10 @@ public class FxMain extends Application {
         });
 
         var killButton = new Button("End Process");
-
+        killButton.setOnAction(event -> {
+            ObservableList <ProcessView> selectedRows = tableView.getSelectionModel().getSelectedItems();
+            System.out.println(selectedRows);
+        });
 
         SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
         sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
