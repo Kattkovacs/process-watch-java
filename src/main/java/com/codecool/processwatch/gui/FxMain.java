@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -40,6 +41,11 @@ public class FxMain extends Application {
      * @param primaryStage a stage created by the JavaFX runtime.
      */
     public void start(Stage primaryStage) {
+
+        //Favicon
+        Image icon = new Image("/icon-process.png");
+        primaryStage.getIcons().add(icon);
+
         primaryStage.setTitle(TITLE);
 
         ObservableList<ProcessView> displayList = observableArrayList();
