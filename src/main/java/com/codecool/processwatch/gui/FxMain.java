@@ -66,6 +66,13 @@ public class FxMain extends Application {
         tableView.getColumns().add(processNameColumn);
         tableView.getColumns().add(argsColumn);
 
+
+        //Selection
+        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        ObservableList <ProcessView> selectedRows = tableView.getSelectionModel().getSelectedItems();
+        System.out.println(selectedRows);
+
+
         // Filter feature starts here
         FilteredList<ProcessView> filteredProcess = new FilteredList(displayList, p -> true);//Pass the data to a filtered list
 
