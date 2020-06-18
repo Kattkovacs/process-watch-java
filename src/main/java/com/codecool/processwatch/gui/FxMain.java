@@ -14,7 +14,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
@@ -84,23 +86,6 @@ public class FxMain extends Application {
         AtomicReference<Integer> countRunningProcesses = new AtomicReference<>(displayList.size());
         Label footerPane = new Label(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
 
-        var refreshButton = new Button("Refresh");
-        refreshButton.setOnAction(ignoreEvent -> {
-            app.refresh();
-            countRunningProcesses.set(displayList.size());
-            footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
-        });
-
-        var killButton = new Button("End Process");
-        killButton.setOnAction(event -> {
-            ObservableList <ProcessView> selectedRows = tableView.getSelectionModel().getSelectedItems();
-            System.out.println(selectedRows);
-        });
-
-        SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
-        sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
-        tableView.setItems(sortedProcess);//Set the table's items using the sorted List
-
         ChoiceBox<String> choiceBox = new ChoiceBox();
         choiceBox.getItems().addAll("Process ID", "Parent Process ID", "Owner", "Name", "Arguments");
         choiceBox.setValue("Owner");
@@ -132,6 +117,31 @@ public class FxMain extends Application {
             footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
         });
 
+        var refreshButton = new Button("Refresh");
+        refreshButton.setOnAction(ignoreEvent -> {
+            app.refresh();
+            textField.setText("");
+            countRunningProcesses.set(displayList.size());
+            countFilteredProcesses.set(filteredProcess.size());
+            footerPane.setText(countRunningProcesses.toString() + " process(es) running; " + countFilteredProcesses.toString() + " item(s) displayed");
+        });
+
+        SortedList<ProcessView> sortedProcess = new SortedList<>(filteredProcess);
+        sortedProcess.comparatorProperty().bind(tableView.comparatorProperty());
+        tableView.setItems(sortedProcess);//Set the table's items using the sorted List
+
+        var killButton = new Button("End Process");
+        killButton.setOnAction(event -> {
+            ObservableList <ProcessView> selectedRows = tableView.getSelectionModel().getSelectedItems();
+
+            for (ProcessView selectedRow: selectedRows){
+                Long pid = selectedRow.getPid();
+                destroyProcess(pid);
+            }
+            textField.setText("");
+            app.refresh();
+        });
+
         choiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) ->
         {
             if (newVal != null)
@@ -158,14 +168,15 @@ public class FxMain extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
+    public void destroyProcess(Long pid) {
+        Stream<ProcessHandle> liveProcesses = ProcessHandle.allProcesses();
+        liveProcesses
+        .filter(ProcessHandle::isAlive)
+        .filter(processHandle -> processHandle.pid() == pid)
+        .forEach(ProcessHandle::destroy);
+        }
 }
 
 
 
-//public void destroyProcess(Long pid) {
-//        Stream<ProcessHandle> liveProcesses = ProcessHandle.allProcesses();
-//        liveProcesses
-//        .filter(ProcessHandle::isAlive)
-//        .filter(processHandle -> processHandle.pid() == pid)
-//        .forEach(ProcessHandle::destroy);
-//        }
